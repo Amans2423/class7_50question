@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Class 7 Quiz Game - Fun App Look</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent1:#7f7fd5;
+      --accent2:#91eae4;
+      --card:#ffffff;
+      --muted:#475569;
+      --good:#16a34a;
+      --bad:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(135deg,var(--accent1),#86a8e7,var(--accent2));
+      background-size:400% 400%;
+      animation:bgmove 10s ease infinite;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      color:#0f172a;
+    }
+    @keyframes bgmove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .container{
+      width:100%;
+      max-width:960px;
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:0 10px 40px rgba(2,6,23,0.18);
+      overflow:hidden;
+      transform:translateY(0);
+    }
+    header{
+      padding:18px 20px;
+      background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    header h1{margin:0;font-size:20px;color:#0b5ed7;font-weight:700}
+    main{padding:18px 20px}
+    .center{text-align:center}
+    #startScreen{padding:6px 12px}
+    input[type=text]{padding:12px;border-radius:12px;border:1px solid #e6eefc;width:100%;max-width:340px;font-size:16px;margin-bottom:12px}
+    .card-p{background:#f6fbff;padding:12px;border-radius:12px;margin-bottom:12px;color:var(--muted)}
+    .instructions ul{padding-left:18px;margin:6px 0}
+    button{
+      background:#0b5ed7;color:white;border:none;padding:12px 16px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;
+      box-shadow:0 6px 18px rgba(11,94,215,0.12);
+    }
+    button.ghost{background:transparent;color:var(--muted);border:1px solid #e6eefc;box-shadow:none}
+    .wrap{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    /* quiz */
+    .quiz-shell{padding:6px 6px 18px 6px}
+    .progress{font-size:14px;color:var(--muted);margin-bottom:10px;text-align:center}
+    .question{font-size:20px;font-weight:600;margin-bottom:12px}
+    .options{display:grid;gap:10px;margin-bottom:8px}
+    .option{
+      background:#f0f9ff;padding:12px;border-radius:12px;border:2px solid transparent;cursor:pointer;font-size:16px;line-height:1.3;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .option:active{transform:scale(.995)}
+    .option:hover{box-shadow:0 6px 18px rgba(2,6,23,0.06);transform:translateY(-2px)}
+    .option.correct{background:#dcfce7;border-color:#16a34a}
+    .option.wrong{background:#fee2e2;border-color:#ef4444}
+    .controls{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:10px;flex-wrap:wrap}
+    .explain{margin-top:12px;padding:10px;border-left:4px solid #bfdbfe;background:#fbfdff;border-radius:8px;display:none}
+    .section-list{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .section-btn{padding:8px 12px;border-radius:12px;border:1px solid #e6eefc;background:white;cursor:pointer}
+    .section-btn.active{background:linear-gradient(90deg,#3b82f6,#06b6d4);color:white;border:none}
+    .final-box{padding:12px;border-radius:12px;background:#f8fafc;margin-top:12px;display:none}
+    .download-btn{background:#059669}
+    /* responsive */
+    @media(max-width:640px){
+      .question{font-size:18px}
+      .option{font-size:15px;padding:12px}
+      button{font-size:15px;padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎮 Class 7 Quiz — Computers & Cyber Safety</h1>
+      <div style="font-size:13px;color:var(--muted)">5 Sections • 10 Q each • Mobile friendly</div>
+    </header>
+
+    <main>
+      <!-- START -->
+      <section id="startScreen">
+        <div class="center">
+          <p style="margin:6px 0;font-weight:600">Enter student name to begin</p>
+          <input id="studentName" type="text" placeholder="Full name (e.g. Rahul Kumar)"/>
+          <div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px;">
+            <button id="startBtn">🚀 Start Quiz</button>
+            <button id="clearAll" class="ghost">🗑️ Clear All Data</button>
+          </div>
+        </div>
+
+        <div class="card-p instructions">
+          <h3 style="margin:6px 0">📘 Instructions</h3>
+          <ul>
+            <li>5 sections × 10 questions (50 total).</li>
+            <li>Correct = <b>+2</b>, Wrong = <b>−0.25</b>.</li>
+            <li>Explanation appears immediately after answering.</li>
+            <li>Progress auto-saves in this browser. Use the same device to resume.</li>
+            <li>After each section finish, download PDF or take screenshot and send to teacher.</li>
+          </ul>
+        </div>
+
+        <div id="resumeBox" class="card-p" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600">Saved progress found for: <span id="resumeName"></span></div>
+              <div style="font-size:13px;color:var(--muted)">You can resume where you left off.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button id="resumeBtn" class="ghost">Resume</button>
+              <button id="freshBtn">Start Fresh</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="quizArea" style="display:none">
+        <div class="section-list" id="sectionList"></div>
+
+        <div class="quiz-shell">
+          <div class="progress"><span id="sectionTitle">Section</span> • Q <span id="qNum">1</span>/10 • Section Score: <span id="sectionScore">0.00</span></div>
+          <div class="question" id="question">Select a section to start</div>
+          <div class="options" id="options"></div>
+
+          <div class="explain" id="explain"></div>
+
+          <div class="controls">
+            <div style="display:flex;gap:8px;flex:1">
+              <button id="prevBtn" class="ghost" style="min-width:110px">⬅️ Prev</button>
+              <button id="nextBtn" style="min-width:110px">👉 Next</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button id="saveBtn" class="ghost">💾 Save</button>
+              <button id="endSectionBtn">🏁 End Section</button>
+            </div>
+          </div>
+
+          <div class="final-box" id="finalBox">
+            <h3>📊 Section Completed</h3>
+            <div id="sectionResultCard" style="background:white;padding:10px;border-radius:10px">
+              <p><b>Student:</b> <span id="resName"></span></p>
+              <p><b>Section:</b> <span id="resSection"></span></p>
+              <p><b>Section Score:</b> <span id="resScore"></span></p>
+              <p><b>Comment:</b> <span id="resComment"></span></p>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button id="downloadSection" class="download-btn">📥 Download Section Result (PDF)</button>
+              <button id="nextSection">➡️ Next Section</button>
+              <button id="restartSection" class="ghost">🔄 Restart Section</button>
+            </div>
+            <p style="font-size:13px;color:var(--muted);margin-top:8px">Take screenshot or download PDF of this page and send it to your teacher.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- OVERALL -->
+      <section id="overall" style="display:none;margin-top:10px">
+        <div class="final-box" id="overallBox">
+          <h2 class="center">🏆 Final Result</h2>
+          <p><b>Student:</b> <span id="finalName"></span></p>
+          <div id="perSectionScores" style="margin:8px 0"></div>
+          <h3>Total Score: <span id="finalTotal"></span></h3>
+          <p id="finalComment" style="font-weight:600"></p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="downloadFinal">📥 Download Full Result (PDF)</button>
+            <button id="restartAll" class="ghost">🔁 Restart Entire Quiz</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+  /******************************************************************
+   * Full functional JavaScript for the quiz
+   * - 5 sections x 10 questions (50)
+   * - +2 / -0.25 scoring
+   * - explanations shown after each answer
+   * - localStorage save per-section and overall
+   * - per-section PDF and final PDF downloads
+   * - mobile-optimized interactions
+   ******************************************************************/
+
+  // ---------------- Questions data (5 sections x 10) ----------------
+  const SECTIONS = [
+    { id:1, title:'Generations of Computers', questions:[
+      {q:'Which technology was used in first generation computers?', opts:['Transistors','Vacuum tubes','Integrated circuits','Microprocessors'], ans:1, exp:'First generation (1940s-1950s) used vacuum tubes.'},
+      {q:'Which generation introduced transistors?', opts:['Second','First','Fourth','Fifth'], ans:0, exp:'Second generation (1950s-1960s) used transistors.'},
+      {q:'Integrated Circuits (ICs) became common in which generation?', opts:['Third','Second','First','Fourth'], ans:0, exp:'Third generation (1960s) used ICs.'},
+      {q:'Microprocessors made personal computers possible in which generation?', opts:['Fourth','First','Second','Third'], ans:0, exp:'Fourth generation (1970s-1980s) used microprocessors.'},
+      {q:'Which generation focuses on artificial intelligence research?', opts:['Fifth','Second','Third','First'], ans:0, exp:'Fifth generation aims to use AI and advanced computing.'},
+      {q:'Which is a feature of later generations compared to earlier ones?', opts:['Larger size','Slower speed','More reliability and smaller size','Only vacuum tubes'], ans:2, exp:'Later generations became smaller, faster, and more reliable.'},
+      {q:'The ENIAC is example of which generation?', opts:['First','Second','Third','Fourth'], ans:0, exp:'ENIAC (1940s) is a first generation computer.'},
+      {q:'Which component decreased in size due to ICs?', opts:['Monitor','CPU only','Transistors only','Overall circuit size'], ans:3, exp:'Integrated Circuits made the overall circuitry smaller and denser.'},
+      {q:'Which generation first used magnetic core memory?', opts:['Second','First','Third','Fourth'], ans:0, exp:'Magnetic core memory was used in second generation machines.'},
+      {q:'Which advancement helped make computers affordable for homes?', opts:['Microprocessors','Vacuum tubes','Punch cards','Magnetic drums'], ans:0, exp:'Microprocessors allowed low-cost personal computers.'}
+    ]},
+
+    { id:2, title:'Scratch Programming', questions:[
+      {q:'In Scratch, what is a sprite?', opts:['A programming error','An object/character','A sound file','A network'], ans:1, exp:'A sprite is a character or object that can move and act on the stage.'},
+      {q:'Which block starts when you click the green flag?', opts:['When clicked','When key pressed','When green flag clicked','Forever'], ans:2, exp:'"When green flag clicked" is the event block to start programs.'},
+      {q:'Which block repeats actions a fixed number of times?', opts:['Forever','Repeat until','Repeat (n times)','If then'], ans:2, exp:'Repeat (n) runs the blocks inside a set number of times.'},
+      {q:'How do you change how a sprite looks in Scratch?', opts:['Sounds tab','Costumes tab','Variables tab','Backdrops tab'], ans:1, exp:'Use the Costumes tab to edit or switch a sprite’s appearance.'},
+      {q:'Which block moves a sprite forward?', opts:['Change color','Move 10 steps','Speak','Wait'], ans:1, exp:'Move 10 steps moves the sprite forward by given steps.'},
+      {q:'Which block checks if two values are equal?', opts:['Operators block','Looks block','Motion block','Sound block'], ans:0, exp:'Operators contain blocks like =, <, > for comparisons.'},
+      {q:'Which event starts when a key is pressed?', opts:['When key pressed','When green flag clicked','Broadcast','Forever'], ans:0, exp:'"When key pressed" starts a script on pressing specified key.'},
+      {q:'Which block is used to send messages between sprites?', opts:['Broadcast','Say','Play sound','Change size'], ans:0, exp:'Broadcast messages let sprites communicate and trigger scripts.'},
+      {q:'Which tab in Scratch lets you add sound to a sprite?', opts:['Variables','Looks','Sounds','Backdrops'], ans:2, exp:'Sounds tab is used to add or edit audio for sprites.'},
+      {q:'To make a sprite glide to a position, use which block?', opts:['Move steps','Go to x:y','Glide seconds to x:y','Change x by'], ans:2, exp:'Glide smoothly moves a sprite to a position over given seconds.'}
+    ]},
+
+    { id:3, title:'Internet & Networks', questions:[
+      {q:'What does LAN stand for?', opts:['Local Area Network','Large Area Network','Linked Access Network','Local Access Node'], ans:0, exp:'LAN means Local Area Network typically used in a building or school.'},
+      {q:'WAN stands for?', opts:['Wide Area Network','World Area Network','Web Access Network','Wide Access Node'], ans:0, exp:'WAN connects networks over large geographic areas.'},
+      {q:'MAN is used for which area?', opts:['Single home','City or large campus','Worldwide','Single device'], ans:1, exp:'MAN (Metropolitan Area Network) covers city-sized areas.'},
+      {q:'Which device forwards data between different networks?', opts:['Switch','Hub','Router','Printer'], ans:2, exp:'Router connects and routes traffic between networks.'},
+      {q:'Which device connects many devices inside a LAN?', opts:['Router','Switch','Modem','Monitor'], ans:1, exp:'Switch connects multiple devices within a local network.'},
+      {q:'The Internet is best described as?', opts:['A single computer','A worldwide network of networks','A web browser','A website'], ans:1, exp:'Internet is a global system linking many networks together.'},
+      {q:'Which protocol is used to view web pages?', opts:['FTP','SMTP','HTTP','POP3'], ans:2, exp:'HTTP is the protocol used to transfer web pages.'},
+      {q:'What does IP address identify?', opts:['A website name','A device on a network','A file type','A browser'], ans:1, exp:'An IP address uniquely identifies a device on the network.'},
+      {q:'Wi-Fi uses which type of waves?', opts:['Radio waves','Light waves','Sound waves','Water waves'], ans:0, exp:'Wi-Fi transmits data over radio frequency waves.'},
+      {q:'A modem is used to?', opts:['Display images','Connect to the Internet','Store files','Print documents'], ans:1, exp:'A modem helps a computer connect to the Internet via ISP.'}
+    ]},
+
+    { id:4, title:'Cybersecurity — Crime, Fraud & Scam', questions:[
+      {q:'Phishing is an attempt to?', opts:['Catch fish','Trick people to reveal information','Speed up computers','Design websites'], ans:1, exp:'Phishing tricks users through fake emails or messages to get personal data.'},
+      {q:'Ransomware does what to your files?', opts:['Deletes them','Encrypts and demands money','Backs them up','Prints them'], ans:1, exp:'Ransomware encrypts files and asks for payment for the decryption key.'},
+      {q:'What should you do when asked for password by message?', opts:['Share it','Never share and inform an adult','Write it on paper and send','Ignore and reply Yes'], ans:1, exp:'Passwords must be kept secret; inform a trusted adult if requested.'},
+      {q:'Identity theft means?', opts:['Stealing someone’s personal info','Copying files','Printing documents','Making a new account'], ans:0, exp:'Identity theft is using another person’s info to commit fraud.'},
+      {q:'A fake website pretending to be a bank is called?', opts:['Genuine site','Spoofed or phishing site','Search engine','Friendly site'], ans:1, exp:'Scammers make fake sites to steal login details—this is spoofing.'},
+      {q:'Which is a safe habit to avoid fraud?', opts:['Click all links','Use strong passwords and 2FA','Share passwords with friends','Use same password everywhere'], ans:1, exp:'Strong passwords and two-factor authentication protect accounts.'},
+      {q:'If you find a USB stick on ground, you should?', opts:['Plug it into your computer','Give it to a friend','Give it to a teacher or adult','Keep it and use it'], ans:2, exp:'Unknown USBs may contain malware; hand them to a responsible adult.'},
+      {q:'Which is an example of online fraud?', opts:['Buying from verified store','Advance-fee scam asking money for a prize','Attending online class','Downloading homework from teacher site'], ans:1, exp:'Advance-fee scams ask for money to release prizes—these are frauds.'},
+      {q:'What is spyware?', opts:['A friendly app','Software that spies and sends data','A networking device','A browser feature'], ans:1, exp:'Spyware secretly sends a person’s data to attackers.'},
+      {q:'Best response to a suspicious call asking for money?', opts:['Send money right away','Tell a trusted adult and verify the call','Share bank details','Ignore and call back immediately'], ans:1, exp:'Always verify such calls with family and bank; do not send money.'}
+    ]},
+
+    { id:5, title:'Ethics, Bullying & Case Studies', questions:[
+      {q:'What should you do if someone bullies you online?', opts:['Retaliate','Tell a trusted adult and keep evidence','Share it widely','Ignore forever'], ans:1, exp:'Report bullying to adults and keep screenshots as evidence.'},
+      {q:'Sharing someone’s private photo without permission is?', opts:['Respectful','Wrong and may be cyberbullying','Encouraged','Neutral'], ans:1, exp:'Sharing private images without consent is unethical and harmful.'},
+      {q:'Digital footprint means?', opts:['Marks on keyboard','Records of your online activity','A virus name','A type of cookie'], ans:1, exp:'Digital footprint is the trail of information you leave online.'},
+      {q:'A classmate asks you to help cheat in online exam; you should?', opts:['Help them','Refuse and tell teacher','Cheat together','Ignore teacher instructions'], ans:1, exp:'Cheating is dishonest; refuse and inform a teacher.'},
+      {q:'Case: A student created a fake account to post insults — consequences may include?', opts:['No consequences','Disciplinary action or legal steps','A prize','Promotion'], ans:1, exp:'Cyberbullying can lead to school discipline and legal action in severe cases.'},
+      {q:'Why is asking for personal info from strangers online risky?', opts:['It is safe','They may misuse it for fraud','It helps them','No effect'], ans:1, exp:'Strangers can use personal info to commit identity theft or scams.'},
+      {q:'If you receive a threatening message, you should?', opts:['Reply with threats','Save evidence and report to platform/adult','Forward to everyone','Delete immediately without telling anyone'], ans:1, exp:'Save messages as evidence and report them to the right authorities.'},
+      {q:'Which is an example of good online etiquette?', opts:['Posting everything publicly','Respecting privacy & asking permission','Sharing passwords','Insulting others'], ans:1, exp:'Good etiquette respects others’ privacy and feelings.'},
+      {q:'Case: A student posted exam answers online — this is?', opts:['Academic dishonesty','Good help','Allowed','No problem'], ans:0, exp:'Posting answers is cheating and harms fair evaluation.'},
+      {q:'How can you help prevent online bullying?', opts:['Join the bully','Report and support the victim','Encourage sharing private info','Ignore victims'], ans:1, exp:'Report bullying, support victims, and do not encourage harmful behavior.'}
+    ]}
+  ];
+
+  // ---------------- State & UI references ----------------
+  let studentName = '';
+  let currentSection = null; // 0-based
+  let questionIndex = 0;
+  let sectionScore = 0;
+
+  const startScreen = document.getElementById('startScreen');
+  const resumeBox = document.getElementById('resumeBox');
+  const resumeName = document.getElementById('resumeName');
+  const startBtn = document.getElementById('startBtn');
+  const studentNameInput = document.getElementById('studentName');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const freshBtn = document.getElementById('freshBtn');
+  const clearAllBtn = document.getElementById('clearAll');
+
+  const quizArea = document.getElementById('quizArea');
+  const sectionList = document.getElementById('sectionList');
+  const sectionTitleEl = document.getElementById('sectionTitle');
+  const qNumEl = document.getElementById('qNum');
+  const sectionScoreEl = document.getElementById('sectionScore');
+  const questionEl = document.getElementById('question');
+  const optionsEl = document.getElementById('options');
+  const explainEl = document.getElementById('explain');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const endSectionBtn = document.getElementById('endSectionBtn');
+  const finalBox = document.getElementById('finalBox');
+
+  const resName = document.getElementById('resName');
+  const resSection = document.getElementById('resSection');
+  const resScore = document.getElementById('resScore');
+  const resComment = document.getElementById('resComment');
+  const downloadSectionBtn = document.getElementById('downloadSection');
+  const nextSectionBtn = document.getElementById('nextSection');
+  const restartSectionBtn = document.getElementById('restartSection');
+
+  const overallSection = document.getElementById('overall');
+  const overallBox = document.getElementById('overallBox');
+  const finalName = document.getElementById('finalName');
+  const perSectionScores = document.getElementById('perSectionScores');
+  const finalTotal = document.getElementById('finalTotal');
+  const finalComment = document.getElementById('finalComment');
+  const downloadFinalBtn = document.getElementById('downloadFinal');
+  const restartAllBtn = document.getElementById('restartAll');
+
+  // localStorage keys
+  const NAME_KEY = 'quiz_student_name_v1';
+  function sectionProgressKey(n){ return 'quiz_section_'+n+'_progress_v1'; } // payload: { questionIndex, sectionScore, student }
+  function sectionScoreKey(n){ return 'quiz_section_'+n+'_score_v1'; } // value: number
+  const OVERALL_KEY = 'quiz_overall_scores_v1';
+
+  // ---------------- Init ----------------
+  function init(){
+    renderSectionButtons();
+    // show resume if name exists
+    const savedName = localStorage.getItem(NAME_KEY);
+    if(savedName){
+      resumeBox.style.display = 'block';
+      resumeName.textContent = savedName;
+      studentNameInput.value = savedName;
+    }
+  }
+
+  function renderSectionButtons(){
+    sectionList.innerHTML = '';
+    SECTIONS.forEach((s,i)=>{
+      const b = document.createElement('button');
+      b.className = 'section-btn';
+      b.textContent = (i+1)+'. '+s.title;
+      b.onclick = ()=>selectSection(i);
+      // show check if saved score exists
+      const saved = localStorage.getItem(sectionScoreKey(i+1));
+      if(saved) b.textContent += ' ✅';
+      sectionList.appendChild(b);
+    });
+  }
+
+  // ---------------- Start / Resume ----------------
+  startBtn.addEventListener('click', ()=>{
+    const name = (studentNameInput.value||'').trim();
+    if(!name){ alert('Please enter student name.'); studentNameInput.focus(); return; }
+    studentName = name;
+    try{ localStorage.setItem(NAME_KEY, studentName); } catch(e){}
+    startScreen.style.display = 'none';
+    quizArea.style.display = 'block';
+    overallSection.style.display = 'none';
+    // auto-select next incomplete
+    const next = findNextIncomplete();
+    if(next !== null) selectSection(next); else selectSection(0);
+  });
+
+  resumeBtn && resumeBtn.addEventListener('click', ()=>{
+    const savedName = localStorage.getItem(NAME_KEY);
+    if(!savedName) return;
+    studentName = savedName;
+    startScreen.style.display = 'none';
+    quizArea.style.display = 'block';
+    overallSection.style.display = 'none';
+    const next = findNextIncomplete();
+    if(next !== null) selectSection(next); else selectSection(0);
+  });
+
+  freshBtn && freshBtn.addEventListener('click', ()=>{
+    if(!confirm('Start fresh? This will remove saved progress for this student on this device.')) return;
+    // clear name and all related keys
+    try{
+      for(let i=1;i<=SECTIONS.length;i++){ localStorage.removeItem(sectionProgressKey(i)); localStorage.removeItem(sectionScoreKey(i)); }
+      localStorage.removeItem(OVERALL_KEY);
+      localStorage.removeItem(NAME_KEY);
+    }catch(e){}
+    location.reload();
+  });
+
+  clearAllBtn.addEventListener('click', ()=>{
+    if(!confirm('Clear all saved data in this browser?')) return;
+    try{ localStorage.clear(); } catch(e){}
+    location.reload();
+  });
+
+  function findNextIncomplete(){
+    for(let i=1;i<=SECTIONS.length;i++){
+      const scoreSaved = localStorage.getItem(sectionScoreKey(i));
+      if(!scoreSaved) return i-1; // 0-based
+    }
+    return null;
+  }
+
+  // ---------------- Section selection & question rendering ----------------
+  function selectSection(index){
+    currentSection = index;
+    questionIndex = 0;
+    sectionScore = 0;
+    finalBox.style.display = 'none';
+    overallSection.style.display = 'none';
+    // highlight active button
+    Array.from(sectionList.children).forEach((b,idx)=> b.classList.toggle('active', idx===index));
+    sectionTitleEl.textContent = SECTIONS[index].title;
+    loadSection(index+1); // loads saved if any
+    renderQuestion();
+  }
+
+  function loadSection(sectionNumber){
+    const raw = localStorage.getItem(sectionProgressKey(sectionNumber));
+    if(raw){
+      try{
+        const p = JSON.parse(raw);
+        questionIndex = Number(p.questionIndex||0);
+        sectionScore = Number(p.sectionScore||0);
+      }catch(e){
+        questionIndex = 0; sectionScore = 0;
+      }
+    } else { questionIndex = 0; sectionScore = 0; }
+    updateSectionScore();
+  }
+
+  function renderQuestion(){
+    const sec = SECTIONS[currentSection];
+    const qObj = sec.questions[questionIndex];
+    questionEl.textContent = qObj.q;
+    qNumEl.textContent = questionIndex+1;
+    sectionScoreEl.textContent = sectionScore.toFixed(2);
+    explainEl.style.display = 'none';
+    explainEl.innerHTML = '';
+    optionsEl.innerHTML = '';
+    qObj.opts.forEach((opt,i)=>{
+      const d = document.createElement('div');
+      d.className = 'option';
+      d.textContent = opt;
+      d.onclick = ()=>chooseAnswer(i,d);
+      optionsEl.appendChild(d);
+    });
+    prevBtn.disabled = questionIndex===0;
+    // smooth scroll on mobile so question is visible
+    setTimeout(()=>{ questionEl.scrollIntoView({behavior:'smooth', block:'center'}); }, 80);
+  }
+
+  function chooseAnswer(choice, el){
+    const sec = SECTIONS[currentSection];
+    const qObj = sec.questions[questionIndex];
+    // disable clicking further on options
+    Array.from(optionsEl.children).forEach(c=>c.onclick=null);
+    if(choice === qObj.ans){
+      el.classList.add('correct');
+      sectionScore += 2;
+      explainEl.innerHTML = '<strong style="color:var(--good)">Correct.</strong> ' + qObj.exp;
+    } else {
+      el.classList.add('wrong');
+      const correctEl = optionsEl.children[qObj.ans];
+      if(correctEl) correctEl.classList.add('correct');
+      sectionScore -= 0.25;
+      explainEl.innerHTML = '<strong style="color:var(--bad)">Wrong.</strong> ' + qObj.exp;
+    }
+    explainEl.style.display = 'block';
+    updateSectionScore();
+    saveSection(currentSection+1);
+  }
+
+  prevBtn.addEventListener('click', ()=>{
+    if(questionIndex > 0){ questionIndex--; renderQuestion(); saveSection(currentSection+1); }
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    const sec = SECTIONS[currentSection];
+    if(questionIndex < sec.questions.length - 1){
+      questionIndex++;
+      renderQuestion();
+      saveSection(currentSection+1);
+    } else {
+      // reached end of section
+      finishSection();
+    }
+  });
+
+  function updateSectionScore(){ sectionScoreEl.textContent = sectionScore.toFixed(2); }
+
+  // ---------------- Save / Load per-section ----------------
+  function saveSection(sectionNumber){
+    const payload = { questionIndex, sectionScore, student: studentName, updatedAt: (new Date()).toISOString() };
+    try{ localStorage.setItem(sectionProgressKey(sectionNumber), JSON.stringify(payload)); localStorage.setItem(sectionScoreKey(sectionNumber), JSON.stringify(sectionScore)); }
+    catch(e){ console.warn('Save failed', e); }
+    // update overall map
+    try{
+      const overall = JSON.parse(localStorage.getItem(OVERALL_KEY)||'{}');
+      overall['section_'+sectionNumber] = sectionScore;
+      localStorage.setItem(OVERALL_KEY, JSON.stringify(overall));
+    }catch(e){}
+    renderSectionButtons();
+  }
+
+  // ---------------- Finish section and show section result ----------------
+  function finishSection(){
+    // Save final for this section
+    saveSection(currentSection+1);
+
+    // Show section result card
+    resName.textContent = studentName;
+    resSection.textContent = SECTIONS[currentSection].title;
+    resScore.textContent = sectionScore.toFixed(2);
+    resComment.textContent = generateComment(sectionScore);
+    finalBox.style.display = 'block';
+    document.getElementById('sectionResultCard').scrollIntoView({behavior:'smooth', block:'center'});
+    // If all finished, show overall automatically
+    if(allSectionsDone()) {
+      // small delay so student sees section card first
+      setTimeout(()=> showOverall(), 800);
+    }
+  }
+
+  function generateComment(score){
+    // per-section max = 20
+    if(score >= 17) return '🌟 Excellent work!';
+    if(score >= 12) return '👏 Very good!';
+    if(score >= 8) return '🙂 Keep practicing.';
+    return '📘 Revise this topic again.';
+  }
+
+  function allSectionsDone(){
+    for(let i=1;i<=SECTIONS.length;i++){
+      if(!localStorage.getItem(sectionScoreKey(i))) return false;
+    }
+    return true;
+  }
+
+  // ---------------- Next section / restart section ----------------
+  nextSectionBtn.addEventListener('click', ()=>{
+    if(currentSection < SECTIONS.length - 1){
+      selectSection(currentSection+1);
+      finalBox.style.display = 'none';
+    } else {
+      // last section done
+      showOverall();
+    }
+  });
+
+  restartSectionBtn.addEventListener('click', ()=>{
+    if(!confirm('Restart this section? This will remove saved progress for this section.')) return;
+    try{ localStorage.removeItem(sectionProgressKey(currentSection+1)); localStorage.removeItem(sectionScoreKey(currentSection+1)); }
+    catch(e){}
+    loadSection(currentSection+1);
+    renderQuestion();
+    finalBox.style.display = 'none';
+    renderSectionButtons();
+  });
+
+  // ---------------- Overall result ----------------
+  function showOverall(){
+    // hide quiz area, show overall section
+    quizArea.style.display = 'none';
+    overallSection.style.display = 'block';
+    finalName.textContent = studentName;
+    perSectionScores.innerHTML = '';
+    const overall = JSON.parse(localStorage.getItem(OVERALL_KEY)||'{}');
+    let total = 0;
+    SECTIONS.forEach((s,i)=>{
+      const sc = Number(overall['section_'+(i+1)]||0).toFixed(2);
+      total += Number(sc);
+      const p = document.createElement('p');
+      p.innerHTML = '<strong>'+(i+1)+'. '+s.title+':</strong> '+sc;
+      perSectionScores.appendChild(p);
+    });
+    finalTotal.textContent = total.toFixed(2);
+    finalComment.textContent = finalCommentText(total);
+    // scroll to overall
+    overallSection.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function finalCommentText(total){
+    // max total = 100
+    if(total >= 85) return '🌟 Outstanding performance!';
+    if(total >= 70) return '👏 Great job!';
+    if(total >= 50) return '👍 Good effort, keep learning!';
+    return '📘 Needs improvement — revise carefully.';
+  }
+
+  restartAllBtn.addEventListener('click', ()=>{
+    if(!confirm('Restart entire quiz and clear all saved data?')) return;
+    try{
+      for(let i=1;i<=SECTIONS.length;i++){ localStorage.removeItem(sectionProgressKey(i)); localStorage.removeItem(sectionScoreKey(i)); }
+      localStorage.removeItem(OVERALL_KEY); localStorage.removeItem(NAME_KEY);
+    }catch(e){}
+    location.reload();
+  });
+
+  // ---------------- PDF download helpers ----------------
+  async function downloadElementAsPDF(element, filename){
+    const { jsPDF } = window.jspdf;
+    // render at higher scale for clarity
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(filename);
+  }
+
+  downloadSectionBtn.addEventListener('click', async ()=>{
+    // prepare a small element with student/section/score/comment for PDF
+    const el = document.getElementById('sectionResultCard');
+    const filename = (studentName||'student').replace(/\s+/g,'_') + '_' + SECTIONS[currentSection].title.replace(/\s+/g,'_') + '_section_result.pdf';
+    downloadElementAsPDF(el, filename);
+  });
+
+  downloadFinalBtn.addEventListener('click', async ()=>{
+    const el = document.getElementById('overallBox');
+    const filename = (studentName||'student').replace(/\s+/g,'_') + '_full_quiz_result.pdf';
+    downloadElementAsPDF(el, filename);
+  });
+
+  // ---------------- Utilities ----------------
+  function updateTotalSaved(){
+    const overall = JSON.parse(localStorage.getItem(OVERALL_KEY)||'{}');
+    const total = Object.values(overall).reduce((a,b)=>a+Number(b||0),0);
+    // show somewhere? optionally in header
+  }
+
+  // keyboard shortcuts (optional)
+  document.addEventListener('keydown', (e)=>{
+    if(quizArea.style.display === 'block'){
+      if(e.key === 'ArrowRight') nextBtn.click();
+      if(e.key === 'ArrowLeft') prevBtn.click();
+    }
+  });
+
+  // ---------------- Boot ----------------
+  init();
+
+  // Expose selectSection if user clicks section buttons before name? ensure start
+  // When a section button is clicked before entering name, prompt to enter name
+  sectionList.addEventListener('click', (ev)=>{
+    if(ev.target && ev.target.classList.contains('section-btn')){
+      if(!localStorage.getItem(NAME_KEY) && !studentName){
+        alert('Please enter student name and click Start first.');
+      }
+    }
+  });
+
+  </script>
+</body>
+</html>
